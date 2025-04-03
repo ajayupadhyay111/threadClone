@@ -7,7 +7,9 @@ const serviceSlice = createSlice({
     darkModeComponent: true,
     myInfo: null,
     allPosts: [],
-    user:{}
+    user: {},
+    postId: null,
+    searchedUser:[]
   },
   reducers: {
     toggleheaderMenu: (state, actions) => {
@@ -21,7 +23,7 @@ const serviceSlice = createSlice({
       state.myInfo = actions.payload;
     },
     addToAllPost: (state, actions) => {
-      let newPosts = [...actions.payload.posts];
+      let newPosts = [...actions.payload];
       if (state.allPosts.length === 0) {
         state.allPosts = newPosts;
         return;
@@ -38,21 +40,32 @@ const serviceSlice = createSlice({
         state.allPosts = existingPosts;
       });
     },
-    addUser:(state,actions)=>{
-      state.user = actions.payload
+    addUser: (state, actions) => {
+      state.user = actions.payload;
     },
-    addSingle:(state,actions)=>{
+    addSingle: (state, actions) => {
       let newArr = [...state.allPosts];
-      let updatedArr = [actions.payload.post,...newArr]
+      let updatedArr = [actions.payload.post, ...newArr];
       let uniqueArr = new Set();
-      let uniquePosts = updatedArr.filter((e)=>{
-        if(!uniqueArr.has(e._id)){
-          uniqueArr.add(e)
-          return true
+      let uniquePosts = updatedArr.filter((e) => {
+        if (!uniqueArr.has(e._id)) {
+          uniqueArr.add(e);
+          return true;
         }
-        return false
-      })
-      state.allPosts = [...uniquePosts]
+        return false;
+      });
+      state.allPosts = [...uniquePosts];
+    },
+    deletePost: (state) => {
+      let postArr = [...state.allPosts];
+      let newArr = postArr.filter((e) => e.id !== state.postId);
+      state.allPosts = newArr;
+    },
+    addPostId:(state,actions)=>{
+      state.postId = actions.payload
+    },
+    addToSearchedUser:(state,actions)=>{
+      state.searchedUser=actions.payload;
     }
   },
 });
@@ -63,6 +76,9 @@ export const {
   addMyInfo,
   addToAllPost,
   addUser,
-  addSingle 
+  addSingle,
+  deletePost,
+  addPostId,
+  addToSearchedUser
 } = serviceSlice.actions;
 export default serviceSlice.reducer;

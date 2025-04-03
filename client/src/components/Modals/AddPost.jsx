@@ -45,7 +45,7 @@ const AddPost = ({ isOpen, handleOpen }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             Create new thread

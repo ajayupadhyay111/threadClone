@@ -1,17 +1,8 @@
-import { Stack,CircularProgress } from "@mui/material";
 const Loading = () => {
   return (
-    <Stack
-      flexDirection={"row"}
-      minHeight={"50vh"}
-      width={"100%"}
-      height={"100%"}
-      justifyContent={"center"}
-      alignItems={"center"}
-      my={5}
-    >
-      <CircularProgress color="success"/>
-    </Stack>
+    <div className="flex justify-center items-center min-h-[50vh] w-full my-5">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+    </div>
   );
 };
 

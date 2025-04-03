@@ -5,14 +5,13 @@ import { CiCirclePlus } from "react-icons/ci";
 import { FaRegComment, FaRegHeart, FaRetweet } from "react-icons/fa6";
 import { IoMdSend } from "react-icons/io";
 import { HiDotsHorizontal } from "react-icons/hi";
-import Post from "@/components/Home/Post";
 const SinglePost = () => {
   return (
     <div className="w-xl mx-auto flex justify-center h-screen items-center flex-col">
       <div className="w-full mx-auto flex justify-center items-center py-5">
         <span className="font-bold">Thread</span>
       </div>
-      <div className="scrollbar-hidden w-full h-full rounded-t-2xl overflow-y-scroll bg-white border border-gray-400">
+      <div className="scrollbar-hidden w-full h-full rounded-t-2xl overflow-y-scroll dark:bg-[#181818] bg-white border border-gray-400 dark:border-gray-400/30 ">
         <div className="border-b border-gray-300 w-full py-3 px-5">
           <div className="w-full flex items-center justify-between gap-2">
             <div className="relative w-11 h-10 rounded-full">
@@ -36,7 +35,7 @@ const SinglePost = () => {
           </div>
           <div className="flex flex-col gap-2">
             <span>hello guys</span>
-            <img src={Img} alt="" loading="lazy" className="aspect-auto" />
+            <img src={Img} alt="" loading="lazy" className="h-76 w-56" />
           </div>
           <div className="w-full flex py-4">
             <span className="flex gap-1 p-2 rounded-3xl hover:bg-gray-100 items-center text-gray-500/80">
@@ -56,9 +55,6 @@ const SinglePost = () => {
               <span>10</span>
             </span>
           </div>
-        </div>
-        <div>
-          <Post />
         </div>
       </div>
     </div>
