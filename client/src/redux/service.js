@@ -1,5 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { addMyInfo, addSingle, addToAllPost, addUser } from "./slice";
+import {
+  addMyInfo,
+  addSingle,
+  addToAllPost,
+  addUser,
+  deletePost,
+} from "./slice";
 export const serviceAPI = createApi({
   reducerPath: "serviceApi",
   baseQuery: fetchBaseQuery({
@@ -61,10 +67,11 @@ export const serviceAPI = createApi({
         }
       },
     }),
-    searchUsers: builder.query({
+    searchUsers: builder.mutation({
       query: (query) => ({
-        url: `/user/search/${query}`,
-        method: "GET",
+        url: `/user/search`,
+        method: "POST",
+        body: query,
       }),
     }),
     followUser: builder.mutation({
@@ -88,9 +95,9 @@ export const serviceAPI = createApi({
         method: "GET",
       }),
       providesTags: (result, err, args) => {
-        return result
+        return result 
           ? [
-              ...result.map(({ _id }) => ({ type: "Post", id: _id })),
+              ...result.posts.map(({ _id }) => ({ type: "Post", id: _id })),
               { type: "Post", id: "LIST" },
             ]
           : [{ type: "Post", id: "LIST" }];
@@ -109,6 +116,9 @@ export const serviceAPI = createApi({
         url: "/post/addpost",
         method: "POST",
         body: data,
+        header: {
+          "Content-Type": "multipart/form-data",
+        },
       }),
       invalidatesTags: ["Post"],
       async onQueryStarted(params, { dispatch, queryFulfilled }) {
@@ -125,10 +135,11 @@ export const serviceAPI = createApi({
         url: `/deletepost/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Post"],
       async onQueryStarted(params, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(data);
+          dispatch(deletePost(data));
         } catch (error) {
           console.log(error);
         }
@@ -139,14 +150,17 @@ export const serviceAPI = createApi({
         url: `/post/like/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Post", id }],
+      invalidatesTags: (result, error, id) => [
+        { type: "Post", id },
+        { type: "User" }, // Add this to invalidate user details
+      ],
     }),
     singlePost: builder.query({
       query: (id) => ({
         url: `/post/${id}`,
         method: "GET",
       }),
-      providesTags: (result, error, { id }) => [{ type: "Post", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "Post", id }],
     }),
     repost: builder.mutation({
       query: (id) => ({
@@ -161,7 +175,10 @@ export const serviceAPI = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Post", id },
+        "User",
+      ],
     }),
     deleteComment: builder.mutation({
       query: ({ postId, id }) => ({
@@ -183,7 +200,7 @@ export const {
   useLogoutMutation,
   useAllPostQuery,
   useUserDetailsQuery,
-  useSearchUsersQuery,
+  useSearchUsersMutation,
   useFollowUserMutation,
   useAddPostMutation,
   useDeletePostMutation,
@@ -191,5 +208,5 @@ export const {
   useSinglePostQuery,
   useRepostMutation,
   useAddCommentMutation,
-  useDeleteCommentMutation
+  useDeleteCommentMutation,
 } = serviceAPI;

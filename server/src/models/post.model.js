@@ -31,6 +31,10 @@ const postSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    repostCount:{
+      type:Number,
+      default:0
+    }
   },
   {
     timestamps: true,

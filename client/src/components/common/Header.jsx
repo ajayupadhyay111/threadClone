@@ -12,6 +12,7 @@ import { useTheme } from "../ThemePorvider";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const {myInfo} = useSelector(state=>state.service)
   const location = useLocation();
   const navigate = useNavigate();
   const path = location.pathname.split("/")[1];
@@ -86,7 +87,7 @@ const Header = () => {
               )}
             </li>
             <li
-              onClick={() => navigate("/profile/threads")}
+              onClick={() => navigate(`/profile/threads/${myInfo.user._id}`)}
               className="py-2 px-5 hover:bg-gray-100 transition-all dark:hover:bg-[#181818] hover:rounded-xl"
             >
               {path === "profile" ? (

@@ -7,13 +7,12 @@ const serviceSlice = createSlice({
     darkModeComponent: true,
     myInfo: null,
     allPosts: [],
-    user: {},
+    userDetails: {},
     postId: null,
     searchedUser:[]
   },
   reducers: {
-    toggleheaderMenu: (state, actions) => {
-      console.log(actions.payload);
+    toggleheaderMenu: (state, actions) => { 
       state.isOpenHeaderMenu = actions.payload;
     },
     toggleDarkModeComponent: (state, actions) => {
@@ -23,7 +22,8 @@ const serviceSlice = createSlice({
       state.myInfo = actions.payload;
     },
     addToAllPost: (state, actions) => {
-      let newPosts = [...actions.payload];
+      console.log(actions.payload)
+      let newPosts = [...actions.payload.posts];
       if (state.allPosts.length === 0) {
         state.allPosts = newPosts;
         return;
@@ -41,7 +41,7 @@ const serviceSlice = createSlice({
       });
     },
     addUser: (state, actions) => {
-      state.user = actions.payload;
+      state.userDetails = actions.payload;
     },
     addSingle: (state, actions) => {
       let newArr = [...state.allPosts];
@@ -56,11 +56,12 @@ const serviceSlice = createSlice({
       });
       state.allPosts = [...uniquePosts];
     },
-    deletePost: (state) => {
-      let postArr = [...state.allPosts];
-      let newArr = postArr.filter((e) => e.id !== state.postId);
-      state.allPosts = newArr;
-    },
+      deletePost: (state) => {
+        let postArr = [...state.allPosts];
+        console.log(state.allPosts,state.postId);
+        let newArr = postArr.filter((e) => e._id !== state.postId);
+        state.allPosts = newArr;
+      },
     addPostId:(state,actions)=>{
       state.postId = actions.payload
     },

@@ -25,7 +25,7 @@ router.put(
   upload.single("image"),
   updateProfile
 );
-router.get("/user/search/:query",authenticateToken,searchUser)
+router.post("/user/search",authenticateToken,searchUser)
 router.post("/user/logout",authenticateToken,logout)
 router.get("/profile",authenticateToken,myInfo)
 

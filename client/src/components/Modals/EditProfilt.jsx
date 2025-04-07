@@ -1,149 +1,139 @@
-// EditProfile.js
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Lock, Plus } from "lucide-react";
 import { FaArrowLeft, FaUser } from "react-icons/fa6";
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
+import { useUpdateProfileMutation } from "@/redux/service";
+import toast from "react-hot-toast";
 
-const EditProfile = ({ isOpen, handleOpen }) => {
-  const [openMiniInputDrawer, setOpenMiniInputDrawer] = useState({
-    inputField: "",
+const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
+  const [updateProfile, updateProfileData] = useUpdateProfileMutation();
+  const [formData, setFormData] = useState({
+    bio: userData?.user?.bio || "",
+    link: userData?.user?.link || "",
+    image: null
   });
-  const [profileData, setProfileData] = useState({
-    id: 1,
-    bio: "",
-    link: "",
-    image:""
-  });
-  const [bio, setBio] = useState("");
-  const [link, setLink] = useState("");
+
+  // Reset form data when modal opens/closes or user data changes
+  useEffect(() => {
+    setFormData({
+      bio: userData?.user?.bio || "",
+      link: userData?.user?.link || "",
+      image: null
+    });
+  }, [userData, isOpen]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileData({ ...profileData, image: file });
+      setFormData(prev => ({ ...prev, image: file }));
     }
   };
 
-  const handleSubmit = () => {
-    setOpenMiniInputDrawer({inputField:""})
-    setProfileData({
-      ...profileData,
-      bio: bio,
-      link: link,
-    });
+  const handleInputChange = (e, field) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('bio', formData.bio);
+      formDataToSend.append('link', formData.link);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+
+      await updateProfile(formDataToSend).unwrap();
+      await refetch();
+      handleOpen(false);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.log(error)
+      toast.error(error?.data?.message || 'Failed to update profile');
+    }
   };
 
   const ImgRef = useRef();
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpen}>
       <DialogContent className="sm:max-w-[525px]">
-        {openMiniInputDrawer.inputField === "" ? (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* readonly */}
-            <div className="flex justify-between gap-3 items-center">
-              <div className="border-b w-full pb-3">
-                <label className="text-sm font-semibold">Name</label>
-                <span className="flex text-sm items-center gap-1">
-                  <Lock size={14} /> {"ajay upadhyay"}({"@ajjugamer171"})
-                </span>
-              </div>
-              <input type="file" className="hidden" ref={ImgRef} onChange={handleImageChange} />
-              <div
-                className="relative flex items-center justify-center size-11 bg-gray-100 rounded-full "
-                onClick={() => ImgRef.current.click()}
-              >
-                <FaUser size={16} />
-                <Plus
-                  className="absolute bottom-2 left-2 bg-black text-white rounded-full border border-white"
-                  size={12}
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Profile Image Section */}
+          <div className="flex justify-between items-center gap-3">
+            <div className="border-b w-full pb-3">
+              <label className="text-sm font-semibold">Name</label>
+              <span className="flex text-sm items-center gap-1">
+                <Lock size={14} /> {userData?.user?.username}
+              </span>
             </div>
-            <div className="border-b pb-3">
-              <label className="text-sm font-semibold">Bio</label>
-              <div
-                onClick={() => setOpenMiniInputDrawer({ inputField: "bio" })}
-                className="text-gray-400 text-sm flex items-center gap-1"
-              >
-                  {profileData.bio !== "" ? (
-                  <span className="text-gray-800">{profileData.bio}</span>
-                ) : (
-                  <>
-                    <Plus size={14} />
-                    <span>Write bio</span>
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="border-b pb-3">
-              <label className="text-sm font-semibold">Link</label>
-              <div
-                onClick={() => setOpenMiniInputDrawer({ inputField: "link" })}
-                className="text-gray-400 text-sm flex items-center gap-1"
-              >
-                {profileData.link !== "" ? (
-                  <span className="text-blue-600">{profileData.link}</span>
-                ) : (
-                  <>
-                    <Plus size={14} />
-                    <span>Add link</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <button
-            
-              type="submit"
-              className={`w-full px-4 py-3 text-md font-medium rounded-lg  bg-black text-white cursor-pointer hover:bg-gray-800`}
+            <input 
+              type="file" 
+              className="hidden" 
+              ref={ImgRef} 
+              onChange={handleImageChange}
+              accept="image/*"
+            />
+            <div
+              className="relative flex items-center justify-center size-11 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+              onClick={() => ImgRef.current.click()}
             >
-              Done
-            </button>
-          </form>
-        ) : (
-          <div className="flex flex-col transition-all">
-            {openMiniInputDrawer.inputField === "bio" ? (
-              <div className="relative">
-                <h1 className="font-bold text-center">Edit bio</h1>
-                <div className="my-3 w-full">
-                  <FaArrowLeft
-                    className="absolute -top-2 -left-2"
-                    onClick={() => setOpenMiniInputDrawer({ inputField: "" })}
-                  />
-                  <textarea
-                    placeholder="Write bio..."
-                    rows={3}
-                    value={bio}
-                    className="w-full outline-none border-none resize-none"
-                    onChange={(e) => setBio(e.target.value)}
-                  ></textarea>
-                </div>
-              </div>
-            ) : (
-              <div className="relative">
-                <h1 className="font-bold text-center">Add link</h1>
-                <FaArrowLeft
-                  className="absolute -top-2 -left-2"
-                  onClick={() => setOpenMiniInputDrawer({ inputField: "" })}
+              {formData.image ? (
+                <img 
+                  src={URL.createObjectURL(formData.image)} 
+                  alt="Preview" 
+                  className="w-full h-full rounded-full object-cover"
                 />
-                <div className="my-3 w-full">
-                  <textarea
-                    placeholder="Add link"
-                    rows={3}
-                    value={link}
-                    className="w-full outline-none border-none resize-none"
-                    onChange={(e) => setLink(e.target.value)}
-                  ></textarea>
-                </div>
-              </div>
-            )}
-            <Button onClick={handleSubmit}>Done</Button>
+              ) : (
+                <>
+                  <FaUser size={16} />
+                  <Plus className="absolute bottom-2 left-2 bg-black text-white rounded-full border border-white" size={12} />
+                </>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Bio Section */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Bio</label>
+            <textarea
+              placeholder="Write your bio..."
+              value={formData.bio}
+              onChange={(e) => handleInputChange(e, 'bio')}
+              className="w-full p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-black"
+              rows={3}
+              maxLength={150}
+            />
+            <p className="text-xs text-gray-500 text-right">
+              {formData.bio.length}/150
+            </p>
+          </div>
+
+          {/* Link Section */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Link</label>
+            <input
+              type="url"
+              placeholder="Add your link..."
+              value={formData.link}
+              onChange={(e) => handleInputChange(e, 'link')}
+              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={updateProfileData.isLoading}
+            className="w-full px-4 py-3 text-md font-medium rounded-lg bg-black dark:bg-white dark:text-black text-white cursor-pointer hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {updateProfileData.isLoading ? 'Updating...' : 'Done'}
+          </button>
+        </form>
       </DialogContent>
     </Dialog>
   );

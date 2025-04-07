@@ -7,9 +7,11 @@ import {
 } from "@/components/ui/dialog";
 
 import UserImg from "../../assets/userImg.jpg";
+import { useAddPostMutation } from "@/redux/service";
 
 const AddPost = ({ isOpen, handleOpen }) => {
   const textareaRef = useRef(null);
+  const [addPost, addPostResponseData] = useAddPostMutation();
   const [postData, setPostData] = useState({
     content: "",
     image: null,
@@ -34,14 +36,17 @@ const AddPost = ({ isOpen, handleOpen }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("content",postData.content)
-    formData.append("iamge",postData.image)
-    // Handle post submission logic here
-    console.log(postData);
+    formData.append("text", postData.content);
+    formData.append("image", postData.image);
+
+    await addPost(formData);
+    setPostData({ content: "", image: null });
+    handleOpen(false);
   };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpen}>
@@ -118,8 +123,12 @@ const AddPost = ({ isOpen, handleOpen }) => {
             </button>
             <button
               type="submit"
-              disabled={postData.content?.length > 0 ?false:true}
-              className={`px-4 py-2 text-sm font-medium rounded-lg  ${postData.content?.length > 0 ?"bg-black dark:bg-[#181818] border text-white cursor-pointer hover:bg-gray-800":"bg-black/50 dark:bg-[#181818] text-white/50 cursor-not-allowed"}`}
+              disabled={postData.content?.length > 0 ? false : true}
+              className={`px-4 py-2 text-sm font-medium rounded-lg  ${
+                postData.content?.length > 0
+                  ? "bg-black dark:bg-[#181818] border text-white cursor-pointer hover:bg-gray-800"
+                  : "bg-black/50 dark:bg-[#181818] text-white/50 cursor-not-allowed"
+              }`}
             >
               Post
             </button>

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { cloudinary } from "../config/cloudinary.js";
 import Comment from "../models/comment.model.js";
 import Post from "../models/post.model.js";
@@ -38,7 +37,7 @@ export const addPost = async (request, response) => {
     return response.status(201).json({
       success: true,
       message: "Post created successfully",
-        post,
+      post,
     });
   } catch (error) {
     console.error("Add Post Error:", error);
@@ -50,31 +49,51 @@ export const addPost = async (request, response) => {
   }
 };
 
-export const getPosts = async (request, response) => {
+export const getAllPosts = async (req, res) => {
   try {
-    const page = parseInt(request.query.page) || 1;
-    const limit = parseInt(request.query.limit) || 10;
-
-    // Calculate pagination values
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Fetch posts from MongoDB with pagination
     const posts = await Post.find()
-      .populate({ path: "likes", select: "-password" })
+      .populate('admin', 'username email profilePic')
+      .populate('likes', '_id username')
       .populate({
-        path: "comments",
-        populate: { path: "admin", model: "User" },
+        path: 'comments',
+        populate: {
+          path: 'admin',
+          select: 'username profilePic'
+        }
       })
-      .populate({ path: "admin", select: "-password" })
-      .skip(skip) // Skip the posts based on the page
-      .limit(limit) // Limit the number of posts per page
-      .sort({ createdAt: -1 }); // Optionally, sort posts by creation date
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    if (posts.length === 0) {
-      return response.status(404).json({ message: "No posts found." });
+    const total = await Post.countDocuments();
+    const hasMore = total > skip + posts.length;
+
+    if (!posts.length && page > 1) {
+      return res.status(200).json({
+        success: true,
+        posts: [],
+        hasMore: false
+      });
     }
-    return response.status(200).json(posts);
-  } catch (error) {}
+
+    res.status(200).json({
+      success: true,
+      posts,
+      hasMore,
+      total
+    });
+
+  } catch (error) {
+    console.error('Get posts error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching posts'
+    });
+  }
 };
 
 export const deletePost = async (request, response) => {
@@ -237,27 +256,37 @@ export const repost = async (request, response) => {
 
     // Check if already reposted
     const user = await User.findById(userId);
-    if (user.reposts.includes(post._id)) {
-      return response.status(200).json({
-        success: true,
-        message: "You already reposted this post.",
-      });
-    }
+    const hasReposted = user.reposts.includes(post._id);
 
-    // Add repost
+    // Toggle repost status
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
-        $push: { reposts: postId },
+        [hasReposted ? "$pull" : "$push"]: { reposts: postId },
       },
       {
         new: true,
       }
     );
 
+    
+    // Update post repost count in Post model if you have one
+    let currentCount = parseInt(post.repostCount || "0");
+
+    if (hasReposted) {
+      currentCount -= 1;
+    } else {
+      currentCount += 1;
+    }
+    
+    post.repostCount = currentCount.toString();
+    await post.save();
+
     return response.status(200).json({
       success: true,
-      message: "Post reposted successfully",
+      message: hasReposted
+        ? "Repost removed successfully"
+        : "Post reposted successfully",
     });
   } catch (error) {
     console.error("Repost Error:", error);
@@ -270,61 +299,65 @@ export const repost = async (request, response) => {
 };
 
 export const singlePost = async (request, response) => {
-    try {
-      const { id: postId } = request.params;
-  
-      // Validate post ID
-      if (!postId) {
-        return response.status(400).json({
-          success: false,
-          message: "Post ID is required"
-        });
-      }
-  
-      // Find and populate post data
-      const post = await Post.findById(postId)
-        .populate({path:"admin",select:"-password"})
-        .populate({
-          path: 'comments',
-          populate: {
-            path: 'admin',
-            select: '-password'
-          },
-          options: { sort: { createdAt: -1 } }
-        })
-        .populate({path:'likes',select:"-password"})
-        .lean();
-  
-      // Check if post exists
-      if (!post) {
-        return response.status(404).json({
-          success: false,
-          message: "Post not found"
-        });
-      }
-  
-      // Format response data
-      const formattedPost = {
-        ...post,
-        likesCount: post.likes.length,
-        commentsCount: post.comments.length,
-        isLiked: request.user ? post.likes.some(like => 
-          like._id.toString() === request.user._id.toString()
-        ) : false
-      };
-  
-      return response.status(200).json({
-        success: true,
-        message: "Post retrieved successfully",
-        data: formattedPost
-      });
-  
-    } catch (error) {
-      console.error("Single Post Error:", error);
-      return response.status(500).json({
+  try {
+    const { id: postId } = request.params;
+
+    // Validate post ID
+    if (!postId) {
+      return response.status(400).json({
         success: false,
-        message: "Error fetching post",
-        error: error.message
+        message: "Post ID is required",
       });
     }
-  };
+
+    // Find and populate post data
+    const post = await Post.findById(postId)
+      .populate({ path: "admin", select: "-password" })
+      .populate({
+        path: "comments",
+        populate: [
+          {
+            path: "admin",
+            select: "-password",
+          },
+          { path: "post", select: "-admin" },
+        ],
+        options: { sort: { createdAt: -1 } },
+      })
+      .populate({ path: "likes", select: "-password" })
+      .lean();
+
+    // Check if post exists
+    if (!post) {
+      return response.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // Format response data
+    const formattedPost = {
+      ...post,
+      likesCount: post.likes.length,
+      commentsCount: post.comments.length,
+      isLiked: request.user
+        ? post.likes.some(
+            (like) => like._id.toString() === request.user._id.toString()
+          )
+        : false,
+    };
+
+    return response.status(200).json({
+      success: true,
+      message: "Post retrieved successfully",
+      data: formattedPost,
+    });
+  } catch (error) {
+    console.error("Single Post Error:", error);
+    return response.status(500).json({
+      success: false,
+      message: "Error fetching post",
+      error: error.message,
+    });
+  }
+};

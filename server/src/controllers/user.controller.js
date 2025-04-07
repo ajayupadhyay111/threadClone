@@ -1,10 +1,8 @@
 import User from "../models/user.model.js";
-import Post from "../models/post.model.js";
-import Comment from "../models/comment.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
-import formidable from "formidable";
 import { cloudinary } from "../config/cloudinary.js";
+import mongoose from "mongoose";
 
 export const signin = async (request, response, next) => {
   try {
@@ -128,7 +126,7 @@ export const userDetails = async (request, response) => {
     }
 
     // Find user by ID and exclude password
-    const user = await User.findById(userId)
+    const user = await User.findById(new mongoose.Types.ObjectId(userId))
       .select("-password")
       .populate("followers")
       .populate({
@@ -137,7 +135,12 @@ export const userDetails = async (request, response) => {
       })
       .populate({
         path: "replies",
-        populate: [{ path: "admin" }],
+        populate: {
+          path: "post",
+          populate: {
+            path: "admin", // yeh post ke andar wali field hai
+          },
+        },
       })
       .populate({
         path: "reposts",
@@ -225,6 +228,7 @@ export const followUser = async (request, response) => {
         success: true,
         message: `Unfollowed ${userToFollow.username}`,
         isFollowing: false,
+        user: currentUser,
       });
     }
 
@@ -250,6 +254,7 @@ export const followUser = async (request, response) => {
       success: true,
       message: `Following ${userToFollow.username}`,
       isFollowing: true,
+      user: currentUser,
     });
   } catch (error) {
     console.error("Follow error:", error);
@@ -265,7 +270,6 @@ export const updateProfile = async (request, response) => {
   try {
     const userId = request.user._id; // Get correct user ID from auth middleware
     const { bio, link } = request.body;
-
     // Input validation
     if (link && !isValidUrl(link)) {
       return response.status(400).json({
@@ -344,8 +348,7 @@ const isValidUrl = (string) => {
 
 export const searchUser = async (request, response) => {
   try {
-    const { query } = request.params;
-
+    const { query } = request.body;
     // Validate search query
     if (!query || query.length < 1) {
       return response.status(400).json({
@@ -354,16 +357,22 @@ export const searchUser = async (request, response) => {
         data: [],
       });
     }
-
+    console.log(query);
     // Sanitize the search query
     const sanitizedQuery = query.trim().replace(/[^a-zA-Z0-9@._-]/g, "");
 
-    const users = await User.find({
+    let users = await User.find({
       $or: [
         { username: { $regex: sanitizedQuery, $options: "i" } },
         { email: { $regex: sanitizedQuery, $options: "i" } },
       ],
-    }).select("username email profilePic bio followers following");
+    })
+      .select("username email profilePic bio followers following")
+      .limit(10);
+
+    users = users.filter(
+      (i) => i._id.toString() !== request.user._id.toString()
+    );
 
     // Return error if no users found
     if (!users || users.length === 0) {
