@@ -22,7 +22,6 @@ const serviceSlice = createSlice({
       state.myInfo = actions.payload;
     },
     addToAllPost: (state, actions) => {
-      console.log(actions.payload)
       let newPosts = [...actions.payload.posts];
       if (state.allPosts.length === 0) {
         state.allPosts = newPosts;
@@ -58,7 +57,6 @@ const serviceSlice = createSlice({
     },
       deletePost: (state) => {
         let postArr = [...state.allPosts];
-        console.log(state.allPosts,state.postId);
         let newArr = postArr.filter((e) => e._id !== state.postId);
         state.allPosts = newArr;
       },

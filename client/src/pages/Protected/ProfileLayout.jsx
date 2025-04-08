@@ -5,15 +5,20 @@ import EditProfile from "@/components/Modals/EditProfilt";
 import { useFollowUserMutation, useUserDetailsQuery } from "@/redux/service";
 import { ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import UserImg from "@/assets/userImg.jpg";
+
 const ProfileLayout = () => {
   const { id } = useParams(); // Use useParams instead of parsing from location
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [user, setUser] = useState({});
   const navigate = useNavigate();
   const { myInfo } = useSelector((state) => state.service);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
 
   // Get user details
-  const { data,refetch } = useUserDetailsQuery(id);
+  const { data, refetch } = useUserDetailsQuery(id);
   const [followUser, followUserData] = useFollowUserMutation();
 
   const [myAccount, setMyAccount] = useState();
@@ -44,14 +49,12 @@ const ProfileLayout = () => {
     }
   };
 
-  console.log(data?.user)
-
   useEffect(() => {
     if (followUserData.isSuccess) {
-      console.log(followUserData);
+      toast.success(followUserData.data.message);
     }
     if (followUserData.isError) {
-      console.log(followUserData.error);
+      toast.error(followUserData.error.data.message);
     }
   }, [followUserData.isSuccess, followUserData.isError]);
   useEffect(() => {
@@ -96,7 +99,10 @@ const ProfileLayout = () => {
             </div>
           </div>
           <div className="mb-1 hover:underline py-2 ">
-            <span className="text-gray-400/90">
+            <span
+              onClick={() => setShowFollowersModal(true)}
+              className="text-gray-400/90"
+            >
               {data
                 ? data.user
                   ? data.user.followers.length > 0
@@ -172,8 +178,94 @@ const ProfileLayout = () => {
         userData={user}
         refetch={refetch}
       />
+      {/* follow modal */}
+      <FollowersModal
+        isOpen={showFollowersModal}
+        handleOpen={setShowFollowersModal}
+        followers={data?.user?.followers || []}
+        following={data?.user?.following || []}
+      />
     </div>
   );
 };
 
 export default ProfileLayout;
+
+const FollowersModal = ({
+  isOpen,
+  handleOpen,
+  followers = [],
+  following = [],
+}) => {
+  const [activeTab, setActiveTab] = useState("followers");
+  const navigate = useNavigate();
+
+  const UserCard = ({ user }) => (
+    <div
+      className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-neutral-800/50 cursor-pointer"
+      onClick={() => {
+        navigate(`/profile/threads/${user._id}`);
+        handleOpen(false);
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <img
+          src={user.profilePic || UserImg}
+          alt={user.username}
+          className="w-10 h-10 rounded-full"
+        />
+        <div>
+          <h3 className="font-semibold">{user.username}</h3>
+          <p className="text-sm text-gray-500">{user.email}</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <div className="flex border-b mb-4">
+          <button
+            className={`flex-1 py-2 text-center font-semibold ${
+              activeTab === "followers"
+                ? "border-b-2 border-black dark:border-white"
+                : ""
+            }`}
+            onClick={() => setActiveTab("followers")}
+          >
+            Followers
+          </button>
+          <button
+            className={`flex-1 py-2 text-center font-semibold ${
+              activeTab === "following"
+                ? "border-b-2 border-black dark:border-white"
+                : ""
+            }`}
+            onClick={() => setActiveTab("following")}
+          >
+            Following
+          </button>
+        </div>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+          {activeTab === "followers" ? (
+            followers.length > 0 ? (
+              followers.map((user) => <UserCard key={user._id} user={user} />)
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No followers yet
+              </div>
+            )
+          ) : following.length > 0 ? (
+            following.map((user) => <UserCard key={user._id} user={user} />)
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Not following anyone
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -29,7 +29,7 @@ const Post = ({ e, refetch }) => {
     dispatch(addPostId(e._id));
     setPostIsReposted(e?.admin?.reposts?.includes(e?._id) ? true : false);
     if(deletePostResponseData.isSuccess){
-      console.log(deletePostResponseData.data)
+      toast.success(deletePostResponseData.data.message)
     }
   }, []);
 

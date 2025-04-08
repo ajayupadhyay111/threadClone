@@ -1,13 +1,11 @@
 import { formatPostTime } from "@/lib/formatPostTime";
 import React from "react";
 import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Replies = () => {
   const { userDetails } = useSelector((state) => state.service);
   const { user } = userDetails;
-  const navigate = useNavigate();
-  console.log(user);
   return (
     <div className="mb-14">
       {user?.replies.length > 0 ? (
@@ -46,7 +44,7 @@ const Replies = () => {
             <div className="flex gap-1.5 w-full border-b pb-5 ">
               <div className="relative w-10 h-10  rounded-full ">
                 <img
-                  src={reply.post.admin.profilePic}
+                  src={user?.profilePic}
                   alt=""
                   className="w-full h-full rounded-full"
                 />

@@ -26,7 +26,7 @@ const Search = () => {
     }
     if (searchUserData.isError) {
       setUsers([]);
-      console.log(searchUserData.error);
+      console.log(searchUserData.error.data.message);
     }
   }, [searchUserData.isSuccess, searchUserData.isError]);
 

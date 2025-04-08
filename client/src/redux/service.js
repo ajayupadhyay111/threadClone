@@ -42,7 +42,7 @@ export const serviceAPI = createApi({
           const { data } = await queryFulfilled;
           dispatch(addMyInfo(data.data));
         } catch (error) {
-          console.log(error);
+          console.log(error.error.data.message);
         }
       },
     }),

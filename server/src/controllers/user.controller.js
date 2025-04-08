@@ -65,7 +65,6 @@ export const signin = async (request, response, next) => {
 export const login = async (request, response) => {
   try {
     const { email, password } = request.body;
-    console.log("userData ", email, password);
     // Check if all fields are present
     if (!email || !password) {
       return response.status(400).json({ message: "All fields required" });
@@ -129,6 +128,7 @@ export const userDetails = async (request, response) => {
     const user = await User.findById(new mongoose.Types.ObjectId(userId))
       .select("-password")
       .populate("followers")
+      .populate("following")
       .populate({
         path: "threads",
         populate: [{ path: "likes" }, { path: "comments" }, { path: "admin" }],
@@ -357,7 +357,6 @@ export const searchUser = async (request, response) => {
         data: [],
       });
     }
-    console.log(query);
     // Sanitize the search query
     const sanitizedQuery = query.trim().replace(/[^a-zA-Z0-9@._-]/g, "");
 

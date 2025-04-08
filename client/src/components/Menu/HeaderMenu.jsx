@@ -19,7 +19,6 @@ const HeaderMenu = ({ openHeader }) => {
   useEffect(()=>{
     if(logoutUserData.isSuccess){
       dispatch(addMyInfo(null))
-      console.log(logoutUserData.data)
     }
   },[logoutUserData.isSuccess])
   const { theme, setTheme } = useTheme();
