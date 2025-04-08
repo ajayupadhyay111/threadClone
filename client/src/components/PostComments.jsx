@@ -27,8 +27,9 @@ const PostComments = ({ post, postId, refetch }) => {
     }, 5000);
   }
 
+
   return (
-    <div className="bg-transparent border-b border-gray-500/40 p-4  shadow-md">
+    <div className="bg-transparent border-b border-gray-500/40 p-4">
       <div className="flex justify-between items-center">
         <div
           onClick={() => navigate(`/profile/threads/${post?.admin._id}`)}
@@ -49,8 +50,8 @@ const PostComments = ({ post, postId, refetch }) => {
             />
           </div>
           <div className="ml-3">
-            <span className="text-white font-semibold hover:underline cursor-pointer">
-              {post.admin.username}
+            <span className=" font-semibold hover:underline cursor-pointer">
+              {post?.admin?.username}
             </span>
             <span className="text-gray-400 text-xs ml-2">
               {formatPostTime(post?.createdAt)}
@@ -78,7 +79,7 @@ const PostComments = ({ post, postId, refetch }) => {
           )}
         </div>
       </div>
-      <p className="text-white mt-2">{post.text}</p>
+      <p className=" mt-2">{post.text}</p>
     </div>
   );
 };

@@ -43,8 +43,8 @@ useEffect(() => {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 ">
-          <div className="dark:bg-[#181818] w-[90%] sm:w-xl rounded-xl h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70  ">
+          <div className="dark:bg-[#181818] bg-white w-[90%] sm:w-xl rounded-xl h-[85vh]">
             <div className="flex justify-between items-center px-4 py-4 border-b dark:border-gray-400/30">
               <div>
                 <button onClick={onClose} className="text-sm cursor-pointer">

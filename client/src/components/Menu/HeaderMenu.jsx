@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { addMyInfo, toggleDarkModeComponent, toggleheaderMenu } from "@/redux/slice";
 import { useLogoutMutation } from "@/redux/service";
 import { useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const HeaderMenu = ({ openHeader }) => {
   const openToggleTheme = useSelector(state=>state.service.darkModeComponent)
+  const {myInfo} = useSelector(state=>state.service)
   const dispatch = useDispatch()
+  const navigate = useNavigate();
   const [logoutUser,logoutUserData] = useLogoutMutation();
   const handleLogout =async ()=>{
     dispatch(toggleheaderMenu(false))
@@ -39,7 +41,7 @@ const HeaderMenu = ({ openHeader }) => {
             >
               Appearence <ChevronRight size={16} />
             </li>
-            <li className="rounded-xl hover:bg-gray-100 hover:dark:bg-neutral-800 py-4 px-3">
+            <li onClick={()=>navigate(`/profile/threads/${myInfo?.user._id}`)} className="rounded-xl hover:bg-gray-100 hover:dark:bg-neutral-800 py-4 px-3">
               My Profile
             </li>
             <li onClick={handleLogout} className="rounded-xl hover:bg-gray-100 hover:dark:bg-neutral-800 py-4 px-3 text-red-500">

@@ -19,7 +19,7 @@ const SinglePost = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const postId = location.pathname.split("/").pop();
-  const { data, isLoading,refetch } = useSinglePostQuery(postId);
+  const { data, isLoading, refetch } = useSinglePostQuery(postId);
   const { myInfo } = useSelector((state) => state.service);
 
   const handleLikePost = async (id) => {
@@ -28,7 +28,7 @@ const SinglePost = () => {
       // Refetch the post data after like
       refetch();
     } catch (error) {
-      console.error('Like error:', error);
+      console.error("Like error:", error);
     }
   };
   const checkIsPostLiked =
@@ -72,12 +72,14 @@ const SinglePost = () => {
           </div>
           <div className="flex flex-col gap-2">
             <span>{data?.data?.text}</span>
-            <img
-              src={data?.data?.media}
-              alt=""
-              loading="lazy"
-              className="h-76 w-56"
-            />
+            {data?.data?.media && (
+              <img
+                src={data?.data?.media}
+                alt=""
+                loading="lazy"
+                className="h-76 w-56"
+              />
+            )}
           </div>
           <div className="w-full flex py-4">
             <span
@@ -123,7 +125,13 @@ const SinglePost = () => {
         <div>
           {data?.data?.comments.length > 0
             ? data?.data?.comments.map((e) => (
-                <PostComments key={e._id} e={e} post={e} postId={postId} refetch={refetch} />
+                <PostComments
+                  key={e._id}
+                  e={e}
+                  post={e}
+                  postId={postId}
+                  refetch={refetch}
+                />
               ))
             : null}
         </div>
