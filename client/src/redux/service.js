@@ -9,8 +9,11 @@ import {
 export const serviceAPI = createApi({
   reducerPath: "serviceApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api",
-    credentials: "include",
+    baseUrl: "https://threadclone-sn8i.onrender.com/api",
+    credentials: "include",  // 👈 send cookie with request
+    headers: {
+      "Content-Type": "application/json",
+    },
   }),
   keepUnusedDataFor: 60 * 60 * 24 * 7,
   tagTypes: ["Post", "User", "Me"],
@@ -95,7 +98,7 @@ export const serviceAPI = createApi({
         method: "GET",
       }),
       providesTags: (result, err, args) => {
-        return result 
+        return result
           ? [
               ...result.posts.map(({ _id }) => ({ type: "Post", id: _id })),
               { type: "Post", id: "LIST" },
