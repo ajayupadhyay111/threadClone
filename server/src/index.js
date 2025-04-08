@@ -12,6 +12,7 @@ dotenv.config();
 const app = express();
 
 app.use(cookieParser());
+app.set("trust proxy", 1); // 👈 only needed in production (Render, etc.)
 app.use(
   cors({
     origin: "https://thread-clone-three-pi.vercel.app",
