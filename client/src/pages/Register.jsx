@@ -43,7 +43,7 @@ const Register = () => {
     if (signInUserData.isError) {
       toast.error(signInUserData.error.data.message);
     } else if (loginUserData.isError) {
-      toast.error(loginUserData.error.data.message);
+      toast.error(loginUserData.error?.data.message);
     }
   }, [signInUserData.isSuccess, loginUserData.isSuccess,signInUserData.isError, loginUserData.isError]);
 
