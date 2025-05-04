@@ -10,7 +10,7 @@ export const serviceAPI = createApi({
   reducerPath: "serviceApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "https://threadclone-sn8i.onrender.com/api",
-    credentials: "include",  // 👈 send cookie with request
+    credentials: "include", // 👈 send cookie with request
     headers: {
       "Content-Type": "application/json",
     },
@@ -115,24 +115,25 @@ export const serviceAPI = createApi({
       },
     }),
     addPost: builder.mutation({
-      query: (data) => ({
+      query: (data) => (
+        console.log(data),
+        {
         url: "/post/addpost",
         method: "POST",
-        body: data,
-        header: {
-          "Content-Type": "multipart/form-data",
-        },
+        body: data, // this should be a FormData object
+        // ❌ DO NOT add headers manually
       }),
       invalidatesTags: ["Post"],
       async onQueryStarted(params, { dispatch, queryFulfilled }) {
         try {
-          const { data } = await queryFulfilled;
+          const { data } = await queryFulfilled; // this will throw if response is 400
           dispatch(addSingle(data));
         } catch (error) {
-          console.log(error);
+          console.log("Error in addPost mutation:", error);
         }
       },
     }),
+    
     deletePost: builder.mutation({
       query: (id) => ({
         url: `/deletepost/${id}`,

@@ -271,6 +271,7 @@ export const updateProfile = async (request, response) => {
   try {
     const userId = request.user._id; // Get correct user ID from auth middleware
     const { bio, link } = request.body;
+
     // Input validation
     if (link && !isValidUrl(link)) {
       return response.status(400).json({
@@ -278,6 +279,7 @@ export const updateProfile = async (request, response) => {
         message: "Please provide a valid URL",
       });
     }
+
 
     // Find user and validate existence
     const user = await User.findById(userId);

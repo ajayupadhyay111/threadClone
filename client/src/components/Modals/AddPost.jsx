@@ -38,13 +38,19 @@ const AddPost = ({ isOpen, handleOpen }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      
     const formData = new FormData();
+    console.log(postData)
     formData.append("text", postData.content);
     formData.append("image", postData.image);
 
     await addPost(formData);
     setPostData({ content: "", image: null });
     handleOpen(false);
+    } catch (error) {
+      console.log("error ",error)
+    }
   };
 
 

@@ -10,7 +10,7 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
   const [formData, setFormData] = useState({
     bio: userData?.user?.bio || "",
     link: userData?.user?.link || "",
-    image: null
+    image: null,
   });
 
   // Reset form data when modal opens/closes or user data changes
@@ -18,42 +18,42 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
     setFormData({
       bio: userData?.user?.bio || "",
       link: userData?.user?.link || "",
-      image: null
+      image: null,
     });
   }, [userData, isOpen]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, image: file }));
     }
   };
 
   const handleInputChange = (e, field) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: e.target.value
+      [field]: e.target.value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('bio', formData.bio);
-      formDataToSend.append('link', formData.link);
+      formDataToSend.append("bio", formData.bio);
+      formDataToSend.append("link", formData.link);
       if (formData.image) {
-        formDataToSend.append('image', formData.image);
+        formDataToSend.append("image", formData.image);
       }
-
-      await updateProfile(formDataToSend).unwrap();
+      console.log(formDataToSend);
+      await updateProfile(formDataToSend);
       await refetch();
       handleOpen(false);
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
     } catch (error) {
-      console.log(error)
-      toast.error(error?.data?.message || 'Failed to update profile');
+      console.log(error);
+      toast.error(error?.data?.message || "Failed to update profile");
     }
   };
 
@@ -71,10 +71,10 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
                 <Lock size={14} /> {userData?.user?.username}
               </span>
             </div>
-            <input 
-              type="file" 
-              className="hidden" 
-              ref={ImgRef} 
+            <input
+              type="file"
+              className="hidden"
+              ref={ImgRef}
               onChange={handleImageChange}
               accept="image/*"
             />
@@ -83,15 +83,18 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
               onClick={() => ImgRef.current.click()}
             >
               {formData.image ? (
-                <img 
-                  src={URL.createObjectURL(formData.image)} 
-                  alt="Preview" 
+                <img
+                  src={URL.createObjectURL(formData.image)}
+                  alt="Preview"
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
                 <>
                   <FaUser size={16} />
-                  <Plus className="absolute bottom-2 left-2 bg-black text-white rounded-full border border-white" size={12} />
+                  <Plus
+                    className="absolute bottom-2 left-2 bg-black text-white rounded-full border border-white"
+                    size={12}
+                  />
                 </>
               )}
             </div>
@@ -103,7 +106,7 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
             <textarea
               placeholder="Write your bio..."
               value={formData.bio}
-              onChange={(e) => handleInputChange(e, 'bio')}
+              onChange={(e) => handleInputChange(e, "bio")}
               className="w-full p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-black"
               rows={3}
               maxLength={150}
@@ -120,7 +123,7 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
               type="url"
               placeholder="Add your link..."
               value={formData.link}
-              onChange={(e) => handleInputChange(e, 'link')}
+              onChange={(e) => handleInputChange(e, "link")}
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
@@ -131,7 +134,7 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
             disabled={updateProfileData.isLoading}
             className="w-full px-4 py-3 text-md font-medium rounded-lg bg-black dark:bg-white dark:text-black text-white cursor-pointer hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {updateProfileData.isLoading ? 'Updating...' : 'Done'}
+            {updateProfileData.isLoading ? "Updating..." : "Done"}
           </button>
         </form>
       </DialogContent>
