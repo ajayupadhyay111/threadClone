@@ -63,7 +63,8 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
 
       if (response.data.success) {
         console.log(response.data)
-        dispatch(addMyInfo(response.data.user));
+        dispatch(addMyInfo(response.data.data));
+        await refetch();
         handleOpen(false);
         toast.success("Profile updated successfully");
       }
