@@ -108,7 +108,7 @@ export const login = async (request, response) => {
     // Return success response
     response.status(200).json({
       message: "Login successful",
-      token
+      token,
     });
   } catch (error) {
     response
@@ -271,7 +271,7 @@ export const updateProfile = async (request, response) => {
   try {
     const userId = request.user._id; // Get correct user ID from auth middleware
     const { bio, link } = request.body;
-
+    console.log(bio);
     // Input validation
     if (link && !isValidUrl(link)) {
       return response.status(400).json({
@@ -279,7 +279,6 @@ export const updateProfile = async (request, response) => {
         message: "Please provide a valid URL",
       });
     }
-
 
     // Find user and validate existence
     const user = await User.findById(userId);
@@ -321,13 +320,7 @@ export const updateProfile = async (request, response) => {
     return response.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user: {
-        id: updatedUser._id,
-        username: updatedUser.username,
-        bio: updatedUser.bio,
-        link: updatedUser.link,
-        profilePic: updatedUser.profilePic,
-      },
+      data: { user },
     });
   } catch (error) {
     console.error("Profile Update Error:", error);

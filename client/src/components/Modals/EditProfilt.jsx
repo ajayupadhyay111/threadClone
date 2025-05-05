@@ -2,11 +2,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Lock, Plus } from "lucide-react";
 import { FaArrowLeft, FaUser } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
-import { useUpdateProfileMutation } from "@/redux/service";
 import toast from "react-hot-toast";
-
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { addMyInfo } from "@/redux/slice";
 const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
-  const [updateProfile, updateProfileData] = useUpdateProfileMutation();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     bio: userData?.user?.bio || "",
     link: userData?.user?.link || "",
@@ -38,6 +40,7 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const formDataToSend = new FormData();
@@ -46,14 +49,29 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
       if (formData.image) {
         formDataToSend.append("image", formData.image);
       }
-      console.log(formDataToSend);
-      await updateProfile(formDataToSend);
-      await refetch();
-      handleOpen(false);
-      toast.success("Profile updated successfully");
+
+      const response = await axios.put(
+        "https://threadclone-sn8i.onrender.com/api/user/updateProfile",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        console.log(response.data)
+        dispatch(addMyInfo(response.data.user));
+        handleOpen(false);
+        toast.success("Profile updated successfully");
+      }
     } catch (error) {
-      console.log(error);
-      toast.error(error?.data?.message || "Failed to update profile");
+      console.error("Update error:", error);
+      toast.error(error?.response?.data?.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,10 +149,10 @@ const EditProfile = ({ isOpen, handleOpen, userData, refetch }) => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={updateProfileData.isLoading}
+            disabled={loading}
             className="w-full px-4 py-3 text-md font-medium rounded-lg bg-black dark:bg-white dark:text-black text-white cursor-pointer hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {updateProfileData.isLoading ? "Updating..." : "Done"}
+            {loading ? "Updating..." : "Done"}
           </button>
         </form>
       </DialogContent>

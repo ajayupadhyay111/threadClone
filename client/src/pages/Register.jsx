@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 const Register = () => {
   const [isLogin, setIsLogin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -21,9 +22,13 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLogin) {
+      setIsLoading(true);
       await loginUser(formData);
+      setIsLoading(false);
     } else {
+      setIsLoading(true);
       await signinUser(formData);
+      setIsLoading(false);
     }
   };
 
@@ -34,7 +39,7 @@ const Register = () => {
 
   useEffect(() => {
     if (signInUserData.isSuccess) {
-      setIsLogin(true)
+      setIsLogin(true);
       toast.success(signInUserData.data.message);
     } else if (loginUserData.isSuccess) {
       toast.success(loginUserData.data.message);
@@ -45,9 +50,13 @@ const Register = () => {
     } else if (loginUserData.isError) {
       toast.error(loginUserData.error?.data.message);
     }
-  }, [signInUserData.isSuccess, loginUserData.isSuccess,signInUserData.isError, loginUserData.isError]);
+  }, [
+    signInUserData.isSuccess,
+    loginUserData.isSuccess,
+    signInUserData.isError,
+    loginUserData.isError,
+  ]);
 
-  
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -134,7 +143,13 @@ const Register = () => {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
             >
-              {isLogin ? "Sign in" : "Register"}
+              {isLogin
+                ? isLoading
+                  ? "signing in..."
+                  : "Sign in"
+                : isLoading
+                ? "signing up..."
+                : "Sign up"}
             </button>
           </div>
         </form>

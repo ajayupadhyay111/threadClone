@@ -90,7 +90,19 @@ export const serviceAPI = createApi({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Me"],
+      invalidatesTags: ["Me","User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          // Update user info in Redux store if needed
+          if (data.success) {
+            console.log(data)
+            dispatch(addMyInfo(data));
+          }
+        } catch (error) {
+          console.error('Profile update error:', error);
+        }
+      },
     }),
     allPost: builder.query({
       query: (page) => ({
